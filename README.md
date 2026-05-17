@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rasoi Manager
 
-## Getting Started
+Restaurant procurement and operations platform built for the Indian market — an [Opsimize](https://opsimize.com) clone adapted for India.
 
-First, run the development server:
+Connects your **PetPooja POS** to track consumption in real-time and places purchase orders to suppliers via **WhatsApp Business API** — automatically.
+
+---
+
+## What's included
+
+**13 routes, zero build errors:**
+
+| Route | What it does |
+|---|---|
+| `/` | Full marketing landing page (Indian market copy, pricing in ₹) |
+| `/dashboard` | Live stats, consumption chart from PetPooja, low-stock alerts, recent orders |
+| `/inventory` | Full stock table with category filters, urgency badges, "Order via WhatsApp" per-item |
+| `/orders` | Order builder → select supplier → add items → set quantities → **Send via WhatsApp** |
+| `/suppliers` | Supplier cards with WhatsApp chat + order links |
+| `/reports` | Bar/pie charts for consumption, inventory value, monthly procurement spend |
+| `/settings` | PetPooja + WhatsApp API credential configuration with `.env.local` instructions |
+| `/api/petpooja/sync` | `POST` — syncs menu + inventory from PetPooja |
+| `/api/petpooja/consumption` | `GET` — consumption report (falls back to mock if no creds) |
+| `/api/whatsapp/send-order` | `POST` — sends formatted purchase order via WhatsApp Cloud API |
+
+---
+
+## Tech stack
+
+- **Framework**: Next.js 14 (App Router, TypeScript)
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **Icons**: Lucide React
+- **POS Integration**: PetPooja REST API
+- **Messaging**: Meta WhatsApp Business Cloud API
+
+---
+
+## Getting started
 
 ```bash
+git clone https://github.com/aviexk/rasoi-manager.git
+cd rasoi-manager
+npm install
+cp .env.local.example .env.local
+# fill in your credentials (see below)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Without credentials the app runs in demo mode** — orders generate a `wa.me` deep-link that opens WhatsApp pre-filled with the full purchase order message, so you can test the entire flow immediately.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Create `.env.local` from the example file:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+# PetPooja POS
+# Get from: partner.petpooja.com → API Settings
+PETPOOJA_APP_KEY=
+PETPOOJA_APP_SECRET=
+PETPOOJA_ACCESS_TOKEN=
+PETPOOJA_RESTAURANT_ID=
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# WhatsApp Business Cloud API (Meta)
+# Get from: developers.facebook.com → WhatsApp → Getting Started
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_ACCESS_TOKEN=
+```
 
-## Deploy on Vercel
+### Getting PetPooja credentials
+1. Log in to `partner.petpooja.com`
+2. Go to **API Settings** → **Generate API Keys**
+3. Copy `app_key`, `app_secret`, `access_token`, and your `restaurant_id`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Getting WhatsApp Business API credentials
+1. Create a Meta Developer account at `developers.facebook.com`
+2. Create a new app → Add **WhatsApp** product
+3. Under **Getting Started**, copy your **Phone Number ID** and generate a **System User access token**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Project structure
+
+```
+src/
+├── app/
+│   ├── page.tsx                    # Landing page
+│   ├── dashboard/page.tsx          # Main dashboard
+│   ├── inventory/page.tsx          # Inventory management
+│   ├── orders/page.tsx             # Order placement + WhatsApp
+│   ├── suppliers/page.tsx          # Supplier management
+│   ├── reports/page.tsx            # Analytics & reports
+│   ├── settings/page.tsx           # Integration settings
+│   └── api/
+│       ├── petpooja/sync/          # PetPooja sync endpoint
+│       ├── petpooja/consumption/   # Consumption data endpoint
+│       └── whatsapp/send-order/    # WhatsApp order endpoint
+├── components/
+│   ├── layout/                     # Sidebar, TopBar, AppShell
+│   ├── landing/                    # Hero, Features, Pricing, etc.
+│   └── dashboard/                  # Charts, alerts, stats cards
+└── lib/
+    ├── petpooja.ts                 # PetPooja API client
+    ├── whatsapp.ts                 # WhatsApp Business API client
+    ├── mock-data.ts                # Demo data (Indian restaurants)
+    └── types.ts                    # TypeScript types
+```
+
+---
+
+## Key features
+
+- **PetPooja sync** — pulls item consumption, sales, and stock data automatically
+- **Low-stock alerts** — colour-coded urgency levels (critical / low / warning)
+- **WhatsApp ordering** — formatted purchase orders sent directly to suppliers
+- **INR currency** — all amounts in Indian Rupees with `en-IN` locale formatting
+- **GST-ready** — supplier records include GSTIN fields
+- **Demo mode** — works without any API credentials out of the box
+
+---
+
+## Deployment
+
+Deploy instantly to Vercel:
+
+```bash
+npx vercel
+```
+
+Add your environment variables in the Vercel dashboard under **Settings → Environment Variables**.
