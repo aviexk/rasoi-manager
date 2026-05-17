@@ -1,6 +1,6 @@
 # Rasoi Manager
 
-Restaurant procurement and operations platform built for the Indian market — an [Opsimize](https://opsimize.com) clone adapted for India.
+Restaurant procurement and operations platform built for the Indian market.
 
 Connects your **PetPooja POS** to track consumption in real-time and places purchase orders to suppliers via **WhatsApp Business API** — automatically.
 
