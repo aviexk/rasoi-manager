@@ -7,9 +7,7 @@ import { mockInventory, mockSuppliers, mockOrders } from "@/lib/mock-data";
 import { formatINR } from "@/lib/utils";
 import {
   MessageCircle,
-  Plus,
   Trash2,
-  Send,
   ShoppingCart,
   ChevronDown,
   CheckCircle,
@@ -44,16 +42,14 @@ function OrderBuilder() {
       const item = mockInventory.find((i) => i.id === prefillItem);
       if (item) {
         const needed = item.minStock * 2 - item.currentStock;
-        setOrderItems([
-          {
-            inventoryItemId: item.id,
-            itemName: item.name,
-            quantity: Math.max(needed, item.minStock),
-            unit: item.unit,
-            unitCost: item.unitCost,
-            totalCost: Math.max(needed, item.minStock) * item.unitCost,
-          },
-        ]);
+        setOrderItems([{
+          inventoryItemId: item.id,
+          itemName: item.name,
+          quantity: Math.max(needed, item.minStock),
+          unit: item.unit,
+          unitCost: item.unitCost,
+          totalCost: Math.max(needed, item.minStock) * item.unitCost,
+        }]);
       }
     }
   }, [prefillItem, prefillSupplier]);
@@ -66,17 +62,14 @@ function OrderBuilder() {
     const inv = mockInventory.find((i) => i.id === inventoryItemId);
     if (!inv || orderItems.find((oi) => oi.inventoryItemId === inventoryItemId)) return;
     const qty = inv.minStock;
-    setOrderItems((prev) => [
-      ...prev,
-      {
-        inventoryItemId: inv.id,
-        itemName: inv.name,
-        quantity: qty,
-        unit: inv.unit,
-        unitCost: inv.unitCost,
-        totalCost: qty * inv.unitCost,
-      },
-    ]);
+    setOrderItems((prev) => [...prev, {
+      inventoryItemId: inv.id,
+      itemName: inv.name,
+      quantity: qty,
+      unit: inv.unit,
+      unitCost: inv.unitCost,
+      totalCost: qty * inv.unitCost,
+    }]);
   }
 
   function updateQty(inventoryItemId: string, qty: number) {
@@ -129,39 +122,41 @@ function OrderBuilder() {
 
   if (sent) {
     return (
-      <div className="bg-white rounded-xl border border-green-200 p-8 text-center shadow-sm">
+      <div className="bg-white rounded-xl border border-green-200 p-10 text-center shadow-sm">
         <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Order Ready to Send!</h3>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Order Ready!</h3>
         <p className="text-slate-500 mb-6 text-sm">
-          Click below to open WhatsApp and send the formatted purchase order to{" "}
+          Click below to open WhatsApp and send the purchase order to{" "}
           <strong>{selectedSupplier?.name}</strong>.
         </p>
-        <a
-          href={sent.waLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors"
-        >
-          <MessageCircle className="w-5 h-5" />
-          Open WhatsApp to Send
-        </a>
-        <button
-          onClick={() => { setSent(null); setOrderItems([]); setSelectedSupplier(null); }}
-          className="ml-4 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
-        >
-          New Order
-        </button>
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href={sent.waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors"
+          >
+            <MessageCircle className="w-5 h-5" />
+            Open WhatsApp to Send
+          </a>
+          <button
+            onClick={() => { setSent(null); setOrderItems([]); setSelectedSupplier(null); }}
+            className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+          >
+            New Order
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
-      {/* Builder */}
+      {/* Left: Steps */}
       <div className="lg:col-span-2 space-y-4">
-        {/* Supplier select */}
+        {/* Step 1 */}
         <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
-          <h3 className="font-semibold text-slate-900 mb-3">1. Select Supplier</h3>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Step 1 — Select Supplier</p>
           <div className="relative">
             <select
               value={selectedSupplier?.id ?? ""}
@@ -174,15 +169,13 @@ function OrderBuilder() {
             >
               <option value="">Choose a supplier…</option>
               {mockSuppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} — {s.city}
-                </option>
+                <option key={s.id} value={s.id}>{s.name} — {s.city}</option>
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
           {selectedSupplier && (
-            <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500">
               <span>📞 +{selectedSupplier.phone}</span>
               <span>📍 {selectedSupplier.city}</span>
               <span>🕐 {selectedSupplier.leadTimeDays}d lead time</span>
@@ -193,10 +186,12 @@ function OrderBuilder() {
           )}
         </div>
 
-        {/* Add items */}
+        {/* Step 2 */}
         {selectedSupplier && (
           <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
-            <h3 className="font-semibold text-slate-900 mb-3">2. Add Items</h3>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+              Step 2 — Add Items ({supplierItems.length} available)
+            </p>
             <div className="flex flex-wrap gap-2">
               {supplierItems.map((item) => {
                 const alreadyAdded = orderItems.some((oi) => oi.inventoryItemId === item.id);
@@ -206,36 +201,48 @@ function OrderBuilder() {
                     key={item.id}
                     onClick={() => addItem(item.id)}
                     disabled={alreadyAdded}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
                       alreadyAdded
-                        ? "bg-slate-100 text-slate-400 border-slate-100 cursor-not-allowed"
+                        ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through"
                         : isLow
-                        ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                        ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 cursor-pointer"
+                        : "bg-white text-slate-700 border-slate-300 hover:bg-orange-50 hover:border-orange-300 cursor-pointer"
                     }`}
                   >
-                    {isLow && !alreadyAdded && <span className="w-1.5 h-1.5 rounded-full bg-red-500" />}
-                    {alreadyAdded && <Plus className="w-3 h-3" />}
-                    {item.name} ({item.currentStock} {item.unit})
+                    {isLow && !alreadyAdded && (
+                      <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                    )}
+                    {alreadyAdded ? "✓ " : "+ "}
+                    {item.name}
+                    <span className="text-xs opacity-60 ml-1">
+                      ({item.currentStock} {item.unit} left)
+                    </span>
                   </button>
                 );
               })}
             </div>
+            {supplierItems.some((i) => i.currentStock <= i.minStock) && (
+              <p className="mt-3 text-xs text-red-500">
+                🔴 Red items are below minimum stock
+              </p>
+            )}
           </div>
         )}
 
-        {/* Order items */}
+        {/* Step 3 */}
         {orderItems.length > 0 && (
           <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
-            <h3 className="font-semibold text-slate-900 mb-3">3. Review & Quantities</h3>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+              Step 3 — Review Quantities
+            </p>
             <div className="space-y-3">
               {orderItems.map((oi) => (
-                <div key={oi.inventoryItemId} className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-800">{oi.itemName}</p>
+                <div key={oi.inventoryItemId} className="flex items-center gap-4 py-2 border-b border-slate-50 last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{oi.itemName}</p>
                     <p className="text-xs text-slate-400">{formatINR(oi.unitCost)} per {oi.unit}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <input
                       type="number"
                       min={1}
@@ -243,39 +250,39 @@ function OrderBuilder() {
                       onChange={(e) => updateQty(oi.inventoryItemId, Number(e.target.value))}
                       className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-orange-300"
                     />
-                    <span className="text-xs text-slate-400 w-8">{oi.unit}</span>
-                    <span className="text-sm font-semibold text-slate-700 w-20 text-right">
+                    <span className="text-xs text-slate-400 w-6">{oi.unit}</span>
+                    <span className="text-sm font-semibold text-slate-800 w-20 text-right">
                       {formatINR(oi.totalCost)}
                     </span>
                     <button
                       onClick={() => removeItem(oi.inventoryItemId)}
                       className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-medium text-slate-500">Expected Delivery</label>
+                <label className="text-xs font-medium text-slate-500 block mb-1">Expected Delivery</label>
                 <input
                   type="date"
                   value={expectedDelivery}
                   onChange={(e) => setExpectedDelivery(e.target.value)}
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-500">Notes (optional)</label>
+                <label className="text-xs font-medium text-slate-500 block mb-1">Notes (optional)</label>
                 <input
                   type="text"
                   placeholder="e.g. Deliver before 9am"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
                 />
               </div>
             </div>
@@ -283,30 +290,33 @@ function OrderBuilder() {
         )}
       </div>
 
-      {/* Summary */}
-      <div className="space-y-4">
+      {/* Right: Summary */}
+      <div>
         <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm sticky top-6">
           <h3 className="font-semibold text-slate-900 mb-4">Order Summary</h3>
 
           {orderItems.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8">
-              Select a supplier and add items to build your order.
-            </p>
+            <div className="py-10 text-center">
+              <ShoppingCart className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">
+                {selectedSupplier ? "Click items above to add them." : "Select a supplier first."}
+              </p>
+            </div>
           ) : (
             <>
               <div className="space-y-2 mb-4">
                 {orderItems.map((oi) => (
-                  <div key={oi.inventoryItemId} className="flex justify-between text-sm">
-                    <span className="text-slate-600 truncate mr-2">{oi.itemName} ×{oi.quantity}{oi.unit}</span>
+                  <div key={oi.inventoryItemId} className="flex justify-between text-sm gap-2">
+                    <span className="text-slate-600 truncate">{oi.itemName} ×{oi.quantity}{oi.unit}</span>
                     <span className="font-medium text-slate-900 flex-shrink-0">{formatINR(oi.totalCost)}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-slate-100 pt-3 flex justify-between font-bold text-slate-900">
+              <div className="border-t border-slate-100 pt-3 flex justify-between font-bold text-slate-900 text-base">
                 <span>Total</span>
                 <span>{formatINR(total)}</span>
               </div>
-              <div className="mt-2 text-xs text-slate-400">+ GST as applicable</div>
+              <p className="text-xs text-slate-400 mt-1">+ GST as applicable</p>
 
               {error && (
                 <p className="mt-3 text-xs text-red-600 bg-red-50 rounded-lg p-2">{error}</p>
@@ -314,20 +324,15 @@ function OrderBuilder() {
 
               <button
                 onClick={handleSendWhatsApp}
-                disabled={sending || !selectedSupplier}
-                className="mt-5 w-full flex items-center justify-center gap-2 py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={sending}
+                className="mt-5 w-full flex items-center justify-center gap-2 py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
               >
-                {sending ? (
-                  "Preparing…"
-                ) : (
-                  <>
-                    <MessageCircle className="w-4 h-4" />
-                    Send via WhatsApp
-                  </>
+                {sending ? "Preparing…" : (
+                  <><MessageCircle className="w-4 h-4" /> Send via WhatsApp</>
                 )}
               </button>
               <p className="text-xs text-slate-400 text-center mt-2">
-                Opens WhatsApp with pre-filled order message
+                Opens WhatsApp with pre-filled order
               </p>
             </>
           )}
@@ -340,7 +345,8 @@ function OrderBuilder() {
 export default function OrdersPage() {
   return (
     <AppShell title="Orders" subtitle="Place purchase orders to suppliers via WhatsApp">
-      <div className="max-w-7xl space-y-6">
+      <div className="max-w-6xl space-y-8">
+        {/* Status bar */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 font-medium">
             <MessageCircle className="w-4 h-4" />
@@ -352,38 +358,38 @@ export default function OrdersPage() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-4">
-          <div>
-            <h2 className="font-semibold text-slate-900 mb-3">New Order</h2>
-            <Suspense fallback={<div className="text-sm text-slate-400">Loading…</div>}>
-              <OrderBuilder />
-            </Suspense>
-          </div>
+        {/* Order builder — full width */}
+        <div>
+          <h2 className="font-semibold text-slate-900 mb-4 text-lg">New Order</h2>
+          <Suspense fallback={<div className="text-sm text-slate-400 py-4">Loading…</div>}>
+            <OrderBuilder />
+          </Suspense>
+        </div>
 
-          <div>
-            <h2 className="font-semibold text-slate-900 mb-3">Order History</h2>
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-              {mockOrders.map((order) => (
-                <div key={order.id} className="px-5 py-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-medium text-slate-900 text-sm">{order.supplierName}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle[order.status]}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>{order.items.length} items · {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span>
-                    <span className="font-semibold text-slate-700">{formatINR(order.totalAmount)}</span>
-                  </div>
-                  {order.status === "sent" && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-green-600">
-                      <MessageCircle className="w-3 h-3" />
-                      Sent via WhatsApp · Awaiting confirmation
-                    </div>
-                  )}
+        {/* Order history — full width below */}
+        <div>
+          <h2 className="font-semibold text-slate-900 mb-4 text-lg">Order History</h2>
+          <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+            {mockOrders.map((order) => (
+              <div key={order.id} className="px-5 py-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-medium text-slate-900">{order.supplierName}</p>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle[order.status]}`}>
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center justify-between text-sm text-slate-400">
+                  <span>{order.items.length} items · {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                  <span className="font-semibold text-slate-700">{formatINR(order.totalAmount)}</span>
+                </div>
+                {order.status === "sent" && (
+                  <div className="mt-1.5 flex items-center gap-1 text-xs text-green-600">
+                    <MessageCircle className="w-3 h-3" />
+                    Sent via WhatsApp · Awaiting confirmation
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
